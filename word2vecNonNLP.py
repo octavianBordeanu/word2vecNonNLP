@@ -7,7 +7,7 @@ class Word2VecNonNLP(object):
 
         self.window_size = 1
         self.learning_rate = 0.05
-        self.epochs = 2
+        self.epochs = 10
         self.embedding_size = 150
         self.batch_training = True
         self.batch_size = 32
@@ -351,6 +351,7 @@ class Word2VecNonNLP(object):
         return batch
 
     def _cbow_train(self, centre, context):
+        # For each iteration, we only update the weights for the one positive sample plus the five negative samples.
         negative_samples = [(centre, 1)] + [(target, 0) for target in self._sample()]
         # Average context vectors for given centre word.
         input_layer = np.mean(np.array([self.input_weights[c] for c in context]), axis=0)
@@ -527,8 +528,8 @@ class Word2VecNonNLP(object):
 
                      probabilities = exp(z) / sum(exp(z))
         """
-        # Compute average of given context vectors.
-        context_vectors_avg = np.mean(np.array([self.output_weights[self.word_to_index[word]] for word in words]),
+        # Compute average of given context vectors (inputs hence use the input weights matrix).
+        context_vectors_avg = np.mean(np.array([self.input_weights[self.word_to_index[word]] for word in words]),
                                       axis=0)
 
         # Exclude words used for prediction.
@@ -540,6 +541,8 @@ class Word2VecNonNLP(object):
         # Turn scores into probabilities using softmax.
         exp_context_scores = np.exp(context_scores)
         probabilities = exp_context_scores / sum(exp_context_scores)
+
+        pdb.set_trace()
 
         output = pd.DataFrame({'word': [word for word in self.vocabulary if word not in words],
                                'index': [index for index in indices],
@@ -583,3 +586,13 @@ class Word2VecNonNLP(object):
         return output
 
 
+word2vec = Word2VecNonNLP()
+# Set the variables to be kept from the file.
+data = word2vec.subset_data(word2vec.open_file(), ['var1', 'var2'])
+word2vec.train(data)
+
+similarities = word2vec.similar(query_word='word', to_csv=False)
+
+predictions = word2vec.predict_word(['word1', 'word2'], to_csv=False)
+
+embeddings = word2vec.embeddings(reduce_dim=True, n_dim=2, to_csv=False)
