@@ -542,8 +542,6 @@ class Word2VecNonNLP(object):
         exp_context_scores = np.exp(context_scores)
         probabilities = exp_context_scores / sum(exp_context_scores)
 
-        pdb.set_trace()
-
         output = pd.DataFrame({'word': [word for word in self.vocabulary if word not in words],
                                'index': [index for index in indices],
                                'probability': probabilities}).sort_values(['probability'], ascending=False)
@@ -596,3 +594,5 @@ similarities = word2vec.similar(query_word='word', to_csv=False)
 predictions = word2vec.predict_word(['word1', 'word2'], to_csv=False)
 
 embeddings = word2vec.embeddings(reduce_dim=True, n_dim=2, to_csv=False)
+
+
